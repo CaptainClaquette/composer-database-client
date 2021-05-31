@@ -1,0 +1,6 @@
+/vendor/
+/nbproject/
+/config/
+/test/
+/.phpdoc/
+/phpdoc.dist.xml

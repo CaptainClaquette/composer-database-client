@@ -1,0 +1,24 @@
+{
+    "name": "hakuryo/database-client",
+    "description": "A simple database client with a lot a helper function",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hakuryo",
+            "email": "kevin.dere@univ-reims.fr"
+        }
+    ],
+    "autoload": {
+        "classmap": [
+            "src/",
+            "src/utils/"
+        ]
+    },
+    "require": {
+        "php": ">=7.0.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    }
+}
