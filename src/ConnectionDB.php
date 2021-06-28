@@ -43,17 +43,15 @@ class ConnectionDB extends PDO
     /**
      * Perform a SELECT/SHOW/DESCRIB request and expect multiple results
      * @param string $request the request to execute. You can use preparedQuery placeholder in $request
-     * @param array $args Argument of the prepared query
-     * @param bool $assoc if assoc is true, $args must be an associative array with
-     * string key else a 0 indexed array
+     * @param array $args An associative/sequential array of argument for the prepared query
      * @return array An array of stdClass object.
      * @throws Exception If the query is not SELECT/SHOW/DESCRIB
      */
-    public function search(string $request, array $args = [], $assoc = true): array
+    public function search(string $request, array $args = []): array
     {
         $this->check_query_type($request, self::QUERY_TYPE_SEARCH);
         $stmt = $this->prepare($request);
-        $this->bind_values($stmt, $args, $assoc);
+        $this->bind_values($stmt, $args);
         $stmt->execute();
         return $this->is_oci() ? $this->fecth_data($stmt) : $this->cast_data($stmt);
     }
@@ -61,33 +59,29 @@ class ConnectionDB extends PDO
     /**
      * Perform a SELECT/SHOW/DESCRIB request and get the first result
      * @param string $request the request to execute. You can use preparedQuery placeholder in $request
-     * @param array $args Argument of the prepared query
-     * @param bool $assoc if assoc is true, $args must be an associative array with
-     * string key else a 0 indexed array
+     * @param array $args An associative/sequential array of argument for the prepared query
      * @return stdClass return You must check if result is relevant with property_exists function.
      * @throws Exception If the query is not SELECT/SHOW/DESCRIB
      * @see property_exists
      */
-    public function get($request, $args = [], $assoc = true): \stdClass
+    public function get($request, $args = []): \stdClass
     {
-        $result = $this->search($request, $args, $assoc);
+        $result = $this->search($request, $args);
         return count($result) > 0 ? $result[0] : new \stdClass();
     }
 
     /**
      * Perform a UPDATE/INSERT/DELETE and return the number of affected rows
      * @param string $request the request to execute. You can use preparedQuery placeholder in $request
-     * @param array $args Argument of the prepared query
-     * @param bool $assoc if assoc is true, $args must be an associative array with
-     * string key else a 0 indexed array
+     * @param array $args An associative/sequential array of argument for the prepared query
      * @return int the number of affected rows
      * @throws Exception If the query is not UPDATE/INSERT/DELETE
      */
-    public function modify($request, $args = [], $assoc = true): int
+    public function modify($request, $args = []): int
     {
         $this->check_query_type($request, self::QUERY_TYPE_MODIFY);
         $stmt = $this->prepare($request);
-        $this->bind_values($stmt, $args, $assoc);
+        $this->bind_values($stmt, $args);
         $stmt->execute();
         return $stmt->rowCount();
     }
@@ -97,9 +91,22 @@ class ConnectionDB extends PDO
         return $this->getAttribute(PDO::ATTR_DRIVER_NAME) === 'oci';
     }
 
-    private function bind_values(PDOStatement &$stmt, array $args, $assoc)
+    private function is_assoc(array $array)
     {
-        if ($assoc) {
+        if (count($array) === 0) {
+            return false;
+        }
+        foreach ($array as $k => $value) {
+            if (!is_string($k)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function bind_values(PDOStatement &$stmt, array $args)
+    {
+        if ($this->is_assoc($args)) {
             foreach ($args as $k => $v) {
                 $stmt->bindValue($k, $v);
             }
