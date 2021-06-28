@@ -73,7 +73,7 @@ $db = ConnectionDB::from_file('config.ini', 'mysql');
 //Usage of anonnymous params
 $rq = "SELECT * FROM users";
 // search function is for multiple result
-print_r($db->search($rq, [1234], false));
+print_r($db->search($rq, [1234]));
 $db =null;
 
 //Connection to oracle
