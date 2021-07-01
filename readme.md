@@ -1,5 +1,9 @@
 ## Patch Note
 
+### 1.2.0
+
+- Add $classname param to search and get function. If set, these function will return database line as $classname object. (POD::FETCH_CLASS)
+
 ### 1.1.0 (Breaking changes)
 
 - Remove $assoc variable from fucntion **search**,**get**,**modify**. Theses function now detect automatically if provided array is associative or not.

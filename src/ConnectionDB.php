@@ -44,30 +44,34 @@ class ConnectionDB extends PDO
      * Perform a SELECT/SHOW/DESCRIB request and expect multiple results
      * @param string $request the request to execute. You can use preparedQuery placeholder in $request
      * @param array $args An associative/sequential array of argument for the prepared query
-     * @return array An array of stdClass object.
+     * @return array An array of $classname object.
      * @throws Exception If the query is not SELECT/SHOW/DESCRIB
      */
-    public function search(string $request, array $args = []): array
+    public function search(string $request, array $args = [], string $classname = "stdClass"): array
     {
         $this->check_query_type($request, self::QUERY_TYPE_SEARCH);
         $stmt = $this->prepare($request);
         $this->bind_values($stmt, $args);
         $stmt->execute();
-        return $this->is_oci() ? $this->fecth_data($stmt) : $this->cast_data($stmt);
+        if ($classname != "stdClass") {
+            return $this->fecth_class($stmt, $classname);
+        } else {
+            return $this->is_oci() ? $this->fecth_data($stmt) : $this->cast_data($stmt);
+        }
     }
 
     /**
      * Perform a SELECT/SHOW/DESCRIB request and get the first result
      * @param string $request the request to execute. You can use preparedQuery placeholder in $request
      * @param array $args An associative/sequential array of argument for the prepared query
-     * @return stdClass return You must check if result is relevant with property_exists function.
+     * @return mixed return You must check if result is relevant with property_exists function.
      * @throws Exception If the query is not SELECT/SHOW/DESCRIB
      * @see property_exists
      */
-    public function get($request, $args = []): \stdClass
+    public function get($request, $args = [], string $classname = "stdClass")
     {
-        $result = $this->search($request, $args);
-        return count($result) > 0 ? $result[0] : new \stdClass();
+        $result = $this->search($request, $args, $classname);
+        return count($result) > 0 ? $result[0] : new $classname;
     }
 
     /**
@@ -151,6 +155,11 @@ class ConnectionDB extends PDO
             $result[] = $obj;
         }
         return $result;
+    }
+
+    private function fecth_class(PDOStatement $stmt, string $classname)
+    {
+        return $stmt->fetchAll(PDO::FETCH_CLASS, $classname);
     }
 
     private function fecth_data(PDOStatement $stmt)
