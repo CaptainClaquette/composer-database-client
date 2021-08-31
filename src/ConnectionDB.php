@@ -131,7 +131,7 @@ class ConnectionDB extends PDO
                 }
                 break;
             case self::QUERY_TYPE_MODIFY:
-                if (!preg_match("/insert|delete|update/", strtolower($rqType[0]))) {
+                if (!preg_match("/insert|delete|update|truncate/", strtolower($rqType[0]))) {
                     throw new Exception('The query must be of type : UPDATE, DELETE or INSERT');
                 }
                 break;
