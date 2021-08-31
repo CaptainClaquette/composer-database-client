@@ -1,5 +1,7 @@
 ## Patch Note
 
+### 1.2.1
+- Allowed "Truncate" keyword in modify request.
 ### 1.2.0
 
 - Add $classname param to search and get function. If set, these function will return database line as $classname object. (POD::FETCH_CLASS)
