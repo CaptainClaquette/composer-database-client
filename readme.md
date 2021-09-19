@@ -1,5 +1,10 @@
 ## Patch Note
 
+### 1.3.0
+- Refectoring ConfigParser
+  - Add support for `pgsl` and `dblib` drivers
+  - Now checking if provided driver is installed with PDO::getAvailableDrivers function
+
 ### 1.2.1
 - Allowed "Truncate" keyword in modify request.
 ### 1.2.0

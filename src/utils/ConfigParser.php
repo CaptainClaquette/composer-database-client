@@ -4,14 +4,16 @@ namespace hakuryo\db\utils;
 
 use Exception;
 use JsonException;
+use PDO;
 use stdClass;
 
 class ConfigParser
 {
 
     const MANDATORY_KEY = ["HOST", "DB", "USER", "PWD", "PORT", "DRIVER"];
+    const ALLOWED_DRIVER = ['oci', 'mysql', 'dblib', 'pgsql'];
 
-    public static function parse_config_file($path, $section)
+    public static function parse_config_file($path, $section = null)
     {
         if (!file_exists($path)) {
             throw new Exception("File $path not found or is not readable");
@@ -23,63 +25,32 @@ class ConfigParser
         switch ($ext) {
             case "json":
                 if (mime_content_type($path) === "application/json") {
-                    return self::parse_json($path, $section);
+                    return self::validate_config(self::parse_json($path, $section));
                 }
                 throw new JsonException("Config file is not a json file or the JSON syntaxe is invalide");
                 break;
             case "ini":
-                return self::parse_ini($path, $section);
+                return self::validate_config(self::parse_ini($path, $section));
                 break;
             default:
                 throw new Exception("Unsupported config file type must be 'json' or 'ini'");
         }
     }
 
-    public static function parse_ini($path, $section): stdClass
+    private static function validate_config(stdClass $config)
     {
-        if ($section === null) {
-            $raw_conf = parse_ini_file($path);
-        } else {
-            $raw_conf = parse_ini_file($path, true);
-            self::section_exist($raw_conf, $section);
-            $raw_conf = parse_ini_file($path, true)[$section];
-        }
-        $keys =  self::MANDATORY_KEY;
-
-        foreach ($keys as $key) {
-            if (array_key_exists($key, $raw_conf)) {
-                if ($key === 'DRIVER' && !in_array(strtolower($raw_conf[$key]), ['oci', 'mysql'])) {
-                    throw new Exception("Wrong 'DRIVER' key value, acceptable values are 'oci','mysql'");
+        foreach (self::MANDATORY_KEY as $key) {
+            if (property_exists($config, $key)) {
+                if ($key === 'DRIVER') {
+                    if (!in_array(strtolower($config->$key), self::ALLOWED_DRIVER)) {
+                        throw new Exception("Wrong 'DRIVER' key value, acceptable values are '" . implode("','", self::ALLOWED_DRIVER) . "'");
+                    }
                 }
             } else {
-                throw new Exception("You must provide a ini file with the followings keys '" . implode("','", $keys) . "'");
+                throw new Exception("You must provide a json file with the followings keys '" . implode("','", self::MANDATORY_KEY) . "'");
             }
         }
-        return self::make_pdo_config($raw_conf);
-    }
-
-    public static function parse_json($path, $section): stdClass
-    {
-        $raw_conf = json_decode(file_get_contents($path), false, 512, JSON_THROW_ON_ERROR);
-        if (!$raw_conf) {
-            throw new JsonException(json_last_error_msg(), json_last_error());
-        }
-        if ($section != null) {
-            self::section_exist($raw_conf, $section);
-            $raw_conf = $raw_conf->$section;
-        }
-        $keys = self::MANDATORY_KEY;
-        $config = new stdClass();
-        foreach ($keys as $key) {
-            if (property_exists($raw_conf, $key)) {
-                if ($key === 'DRIVER' && !in_array(strtolower($raw_conf->$key), ['oci', 'mysql'])) {
-                    throw new Exception("Wrong 'DRIVER' key value, acceptable values are 'oci','mysql'");
-                }
-            } else {
-                throw new Exception("You must provide a json file with the followings keys '" . implode("','", $keys) . "'");
-            }
-        }
-        return self::make_pdo_config($raw_conf);
+        return self::make_pdo_config($config);
     }
 
     private static function section_exist($config, $section)
@@ -96,17 +67,51 @@ class ConfigParser
         }
     }
 
+    private static function parse_ini($path, $section)
+    {
+        if ($section === null) {
+            $raw_conf = parse_ini_file($path);
+        } else {
+            $raw_conf = parse_ini_file($path, true);
+            self::section_exist($raw_conf, $section);
+            $raw_conf = parse_ini_file($path, true)[$section];
+        }
+        return json_decode(json_encode($raw_conf));
+    }
+
+    private static function parse_json($path, $section)
+    {
+        $raw_conf = json_decode(file_get_contents($path), false, 512, JSON_THROW_ON_ERROR);
+        if (!$raw_conf) {
+            throw new JsonException(json_last_error_msg(), json_last_error());
+        }
+        if ($section != null) {
+            self::section_exist($raw_conf, $section);
+            $raw_conf = $raw_conf->$section;
+        }
+        return $raw_conf;
+    }
+
     private static function make_pdo_config($raw_conf)
     {
         $raw_conf = (object) $raw_conf;
         $config = new stdClass();
         $config->user = $raw_conf->USER;
         $config->pwd = $raw_conf->PWD;
-        if ($raw_conf->DRIVER === 'mysql') {
-            $config->dsn = "mysql:host=" . $raw_conf->HOST . ";dbname=" . $raw_conf->DB . ";port=" . intval($raw_conf->PORT);
-        } else {
-            $config->dsn = "oci:dbname=" . $raw_conf->HOST . ":" . intval($raw_conf->PORT) . "/" . $raw_conf->DB;
+        switch ($raw_conf->DRIVER) {
+            case 'mysql':
+            case 'pgsql':
+                $config->dsn = "$raw_conf->DRIVER:host=" . $raw_conf->HOST . ";dbname=" . $raw_conf->DB . ";port=" . intval($raw_conf->PORT);
+                break;
+            case 'dblib':
+            case 'sybase':
+                $config->dsn = "dblib:host=" . $raw_conf->HOST . ";dbname=" . $raw_conf->DB . ";port=" . intval($raw_conf->PORT);
+                break;
+            case 'oci':
+                $config->dsn = "oci:dbname=" . $raw_conf->HOST . ":" . intval($raw_conf->PORT) . "/" . $raw_conf->DB;
+                break;
         }
+        print_r($config);
         return $config;
     }
 }
