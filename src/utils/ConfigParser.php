@@ -45,6 +45,9 @@ class ConfigParser
                     if (!in_array(strtolower($config->$key), self::ALLOWED_DRIVER)) {
                         throw new Exception("Wrong 'DRIVER' key value, acceptable values are '" . implode("','", self::ALLOWED_DRIVER) . "'");
                     }
+                    if (!in_array(strtolower($config->$key), PDO::getAvailableDrivers())) {
+                        throw new Exception("Driver '" . $config->$key . "' is not installed please check your php module with 'php -m' command. Driver found are : '" . implode("','", PDO::getAvailableDrivers()) . "'");
+                    }
                 }
             } else {
                 throw new Exception("You must provide a json file with the followings keys '" . implode("','", self::MANDATORY_KEY) . "'");
@@ -111,7 +114,6 @@ class ConfigParser
                 $config->dsn = "oci:dbname=" . $raw_conf->HOST . ":" . intval($raw_conf->PORT) . "/" . $raw_conf->DB;
                 break;
         }
-        print_r($config);
         return $config;
     }
 }
