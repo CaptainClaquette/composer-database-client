@@ -14,9 +14,10 @@ class ConnectionDB extends PDO
     const QUERY_TYPE_MODIFY = 2;
 
     /**
-     * Create a new instance of ConnectionDB.
-     * @param type $config_path the location of the ini file
-     * @return ConnectionDB
+     * @param string $dsn connection string
+     * @param string|NULL $username User login form your database
+     * @param string|NULL $passwd User password for your database
+     * @param array|NULL $options PDO options
      */
     public function __construct(string $dsn, string $username = NULL, string $passwd = NULL, array $options = NULL)
     {
@@ -29,15 +30,18 @@ class ConnectionDB extends PDO
     /**
      * Create a new instance of ConnectionDB from a ini file.
      * The ini file MUST have the following keys : HOST,DB,USER,PWD,PORT
-     * @param type $config_path the location of the ini file
+     * @param string $path the location of the ini file
      * @return ConnectionDB
      * @throws Exception If the ini file don't provide the mandatory keys "HOST", "DB", "USER", "PWD", "PORT", "DRIVER"
      */
-    public static function from_file($path, $section = null): ConnectionDB
+    public static function from_file(string $path, $section = null): ConnectionDB
     {
         $conf = ConfigParser::parse_config_file($path, $section);
-        $con = new ConnectionDB($conf->dsn, $conf->user, $conf->pwd);
-        return $con;
+        $options = [];
+        if ($conf->throwSQLError) {
+            $options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
+        }
+        return new ConnectionDB($conf->dsn, $conf->user, $conf->pwd, $options);
     }
 
     /**
@@ -52,12 +56,15 @@ class ConnectionDB extends PDO
         $this->check_query_type($request, self::QUERY_TYPE_SEARCH);
         $stmt = $this->prepare($request);
         $this->bind_values($stmt, $args);
-        $stmt->execute();
-        if ($classname != "stdClass") {
-            return $this->fecth_class($stmt, $classname);
-        } else {
-            return $this->is_oci() ? $this->fecth_data($stmt) : $this->cast_data($stmt);
+        $result = $stmt->execute();
+        if ($result) {
+            if ($classname != "stdClass") {
+                return $this->fetch_class($stmt, $classname);
+            } else {
+                return $this->is_oci() ? $this->fetch_data($stmt) : $this->cast_data($stmt);
+            }
         }
+        return [];
     }
 
     /**
@@ -126,7 +133,7 @@ class ConnectionDB extends PDO
         $rqType = explode(' ', $query);
         switch ($type) {
             case self::QUERY_TYPE_SEARCH:
-                if (preg_match("/insert|delete|update/", strtolower($rqType[0]))) {
+                if (preg_match("/insert|delete|update|truncate/", strtolower($rqType[0]))) {
                     throw new Exception('The query must be of type : SELECT, DESCRIBE or SHOW');
                 }
                 break;
@@ -157,12 +164,12 @@ class ConnectionDB extends PDO
         return $result;
     }
 
-    private function fecth_class(PDOStatement $stmt, string $classname)
+    private function fetch_class(PDOStatement $stmt, string $classname)
     {
         return $stmt->fetchAll(PDO::FETCH_CLASS, $classname);
     }
 
-    private function fecth_data(PDOStatement $stmt)
+    private function fetch_data(PDOStatement $stmt)
     {
         return json_decode(json_encode($stmt->fetchAll(PDO::FETCH_ASSOC)));
     }
