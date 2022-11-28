@@ -97,7 +97,7 @@ class ConfigParser
 
     private static function make_pdo_config($raw_conf)
     {
-        $raw_conf = (object) $raw_conf;
+        $raw_conf = (object)$raw_conf;
         $config = new stdClass();
         $config->user = $raw_conf->USER;
         $config->pwd = $raw_conf->PWD;
@@ -108,11 +108,16 @@ class ConfigParser
                 break;
             case 'dblib':
             case 'sybase':
-                $config->dsn = "dblib:host=" . $raw_conf->HOST . ";dbname=" . $raw_conf->DB . ";port=" . intval($raw_conf->PORT);
+                $config->dsn = "dblib:host=$raw_conf->HOST:" . intval($raw_conf->PORT) . ";dbname=" . $raw_conf->DB;
                 break;
             case 'oci':
-                $config->dsn = "oci:dbname=" . $raw_conf->HOST . ":" . intval($raw_conf->PORT) . "/" . $raw_conf->DB;
+                $config->dsn = "oci:dbname = " . $raw_conf->HOST . ":" . intval($raw_conf->PORT) . " / " . $raw_conf->DB;
                 break;
+        }
+        if (property_exists($raw_conf, "THROW_SQL_ERROR")) {
+            $config->throw_SQL_error = filter_var($raw_conf->THROW_SQL_ERROR, FILTER_VALIDATE_INT) === 1;
+        } else {
+            $config->throw_SQL_error = false;
         }
         return $config;
     }

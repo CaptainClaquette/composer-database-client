@@ -6,6 +6,7 @@ use PDO;
 use PDOStatement;
 use Exception;
 use hakuryo\db\utils\ConfigParser;
+use InvalidArgumentException;
 
 class ConnectionDB extends PDO
 {
@@ -38,7 +39,7 @@ class ConnectionDB extends PDO
     {
         $conf = ConfigParser::parse_config_file($path, $section);
         $options = [];
-        if ($conf->throwSQLError) {
+        if ($conf->throw_SQL_error) {
             $options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
         }
         return new ConnectionDB($conf->dsn, $conf->user, $conf->pwd, $options);
@@ -95,6 +96,21 @@ class ConnectionDB extends PDO
         $this->bind_values($stmt, $args);
         $stmt->execute();
         return $stmt->rowCount();
+    }
+
+    private function process_callback(callable $callback, PDOStatement $stmt, string $classname)
+    {
+        $stmt->setFetchMode(PDO::FETCH_CLASS, $classname);
+        $final_result = [];
+        while ($line = $stmt->fetch()) {
+            $user_func_return = call_user_func($callback, $line);
+            if ($classname === "stdClass" ? is_object($user_func_return) : $user_func_return instanceof $classname) {
+                $final_result[] = $user_func_return;
+            } else {
+                throw new InvalidArgumentException("Callback must return an $classname");
+            }
+        }
+        return $final_result;
     }
 
     private function is_oci()
