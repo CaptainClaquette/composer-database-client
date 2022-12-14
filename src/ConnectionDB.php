@@ -69,6 +69,30 @@ class ConnectionDB extends PDO
     }
 
     /**
+     * Perform a procedure call
+     * @param string $request the procedure call to execute. You can use preparedQuery placeholder in $request
+     * @param array $args An associative/sequential array of argument for the prepared query
+     * @param int $return_type If > 0 return rowCount, else return array of stdclass
+     * @return array|int|mixed|null
+     * @throws Exception
+     */
+    public function call(string $request, array $args = [], int $return_type = 0)
+    {
+        $this->check_query_type($request, self::QUERY_TYPE_SEARCH);
+        $stmt = $this->prepare($request);
+        $this->bind_values($stmt, $args);
+        $result = $stmt->execute();
+        if ($result) {
+            if ($return_type === 0) {
+                return $this->is_oci() ? $this->fetch_data($stmt) : $this->cast_data($stmt);
+            } else {
+                return $stmt->rowCount();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Perform a SELECT/SHOW/DESCRIB request and get the first result
      * @param string $request the request to execute. You can use preparedQuery placeholder in $request
      * @param array $args An associative/sequential array of argument for the prepared query
