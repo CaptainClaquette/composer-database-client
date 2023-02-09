@@ -28,10 +28,8 @@ class ConfigParser
                     return self::validate_config(self::parse_json($path, $section));
                 }
                 throw new JsonException("Config file is not a json file or the JSON syntaxe is invalide");
-                break;
             case "ini":
                 return self::validate_config(self::parse_ini($path, $section));
-                break;
             default:
                 throw new Exception("Unsupported config file type must be 'json' or 'ini'");
         }
@@ -111,7 +109,7 @@ class ConfigParser
                 $config->dsn = "dblib:host=$raw_conf->HOST:" . intval($raw_conf->PORT) . ";dbname=" . $raw_conf->DB;
                 break;
             case 'oci':
-                $config->dsn = "oci:dbname = " . $raw_conf->HOST . ":" . intval($raw_conf->PORT) . " / " . $raw_conf->DB;
+                $config->dsn = "oci:dbname=" . $raw_conf->HOST . ":" . intval($raw_conf->PORT) . "/" . $raw_conf->DB;
                 break;
         }
         if (property_exists($raw_conf, "THROW_SQL_ERROR")) {
