@@ -4,3 +4,4 @@
 /test/
 /.phpdoc/
 /phpdoc.dist.xml
+.idea/
