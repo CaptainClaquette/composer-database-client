@@ -72,6 +72,13 @@ pecl install oci8
 ```BASH
 pecl install oci8-2.2.0
 ```
+**Multiple versions**  
+If you have multiple install of PHP you can specify for witch version you want oci8 to be installed.
+```BASH
+sudo pecl -d php_suffix=[PHP_VERSION] install oci8
+# exemple sudo pecl -d php_suffix=7.2 install oci8
+```
+
 
 When PECL ask for the instantClient path provide the path where you've unzip the instantClient Basic and SDK pack:
 
@@ -193,6 +200,12 @@ ldd /usr/lib/php/XXXXXXXXX/oci8.so
 If a lib is flag `not found` search how install it with `apt`.
 
 ## <a name="PHP_PDO_OCI"></a>PHP_PDO_OCI
+
+If you have multiple versions of PHP installed don't forget to set php / phpize / php-config to the target version.  
+You can change version with `update-alternatives --config` on ubuntu distro.
+> update-alternatives --config php  
+> update-alternatives --config phpize  
+> update-alternatives --config php-config  
 
 Download your PHP version source files on https://github.com/php/php-src.
 You must take the branch conrresponding to your php version
