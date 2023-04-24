@@ -1,7 +1,19 @@
 ## Patch Note
 
+### 1.4.3
+- Fix Forcing utf8 queries for dblib driver
+
+### 1.4.2
+- Update composer.json for php8+ compatibility
+
+### 1.4.1
+- Fix space in oci / dblib dsn build
+
+### 1.4.0
+- Add call function to preform SQL procedure calls
+
 ### 1.3.0
-- Refectoring ConfigParser
+- Refactoring ConfigParser
   - Add support for `pgsl` and `dblib` drivers
   - Now checking if provided driver is installed with PDO::getAvailableDrivers function
 
@@ -31,6 +43,8 @@
 
 - Oracle Instantclient
 - PHP PDO_OCI
+- php-sybase
+- php-pgsql
 
 ## Features
 - Parsing client config from INI and JSON file
@@ -46,7 +60,7 @@ DB = mydb
 USER = "root"
 PWD = "mypass"
 PORT = 1234
-DRIVER = "mysql" ;Accepted Values are oci,mysql
+DRIVER = "mysql" ;Accepted Values are oci,mysql,dblib,pgsl
 
 [oracle]
 HOST = "localhost"
@@ -54,7 +68,7 @@ DB = mydb
 USER = "root"
 PWD = "mypass"
 PORT = 1234
-DRIVER = "oci" ;Accepted Values are oci,mysql
+DRIVER = "oci" ;Accepted Values are oci,mysql,dblib,pgsl
 ```
 
 ### Exemple JSON file

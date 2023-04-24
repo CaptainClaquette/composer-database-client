@@ -23,7 +23,7 @@ class ConnectionDB extends PDO
     public function __construct(string $dsn, string $username = NULL, string $passwd = NULL, array $options = NULL)
     {
         parent::__construct($dsn, $username, $passwd, $options);
-        if (!$this->is_oci()) {
+        if (!$this->is_driver('oci') && !$this->is_driver('dblib')) {
             $this->query("SET NAMES 'utf8'");
         }
     }
@@ -38,11 +38,7 @@ class ConnectionDB extends PDO
     public static function from_file(string $path, $section = null): ConnectionDB
     {
         $conf = ConfigParser::parse_config_file($path, $section);
-        $options = [];
-        if ($conf->throw_SQL_error) {
-            $options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
-        }
-        return new ConnectionDB($conf->dsn, $conf->user, $conf->pwd, $options);
+        return new ConnectionDB($conf->dsn, $conf->user, $conf->pwd);
     }
 
     /**
@@ -62,7 +58,7 @@ class ConnectionDB extends PDO
             if ($classname != "stdClass") {
                 return $this->fetch_class($stmt, $classname);
             } else {
-                return $this->is_oci() ? $this->fetch_data($stmt) : $this->cast_data($stmt);
+                return $this->is_driver('oci') ? $this->fetch_data($stmt) : $this->cast_data($stmt);
             }
         }
         return [];
@@ -84,7 +80,7 @@ class ConnectionDB extends PDO
         $result = $stmt->execute();
         if ($result) {
             if ($return_type === 0) {
-                return $this->is_oci() ? $this->fetch_data($stmt) : $this->cast_data($stmt);
+                return $this->is_driver('oci') ? $this->fetch_data($stmt) : $this->cast_data($stmt);
             } else {
                 return $stmt->rowCount();
             }
@@ -137,12 +133,12 @@ class ConnectionDB extends PDO
         return $final_result;
     }
 
-    private function is_oci()
+    private function is_driver($driver): bool
     {
-        return $this->getAttribute(PDO::ATTR_DRIVER_NAME) === 'oci';
+        return $this->getAttribute(PDO::ATTR_DRIVER_NAME) === $driver;
     }
 
-    private function is_assoc(array $array)
+    private function is_assoc(array $array): bool
     {
         if (count($array) === 0) {
             return false;
@@ -155,7 +151,7 @@ class ConnectionDB extends PDO
         return true;
     }
 
-    private function bind_values(PDOStatement &$stmt, array $args)
+    private function bind_values(PDOStatement &$stmt, array $args): void
     {
         if ($this->is_assoc($args)) {
             foreach ($args as $k => $v) {
@@ -168,7 +164,7 @@ class ConnectionDB extends PDO
         }
     }
 
-    private function check_query_type(string $query, int $type)
+    private function check_query_type(string $query, int $type): void
     {
         $rqType = explode(' ', $query);
         switch ($type) {
@@ -185,7 +181,7 @@ class ConnectionDB extends PDO
         }
     }
 
-    private function cast_data(PDOStatement $stmt)
+    private function cast_data(PDOStatement $stmt): array
     {
         $result = [];
         $metas = [];

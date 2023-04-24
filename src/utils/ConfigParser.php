@@ -112,11 +112,6 @@ class ConfigParser
                 $config->dsn = "oci:dbname=" . $raw_conf->HOST . ":" . intval($raw_conf->PORT) . "/" . $raw_conf->DB;
                 break;
         }
-        if (property_exists($raw_conf, "THROW_SQL_ERROR")) {
-            $config->throw_SQL_error = filter_var($raw_conf->THROW_SQL_ERROR, FILTER_VALIDATE_INT) === 1;
-        } else {
-            $config->throw_SQL_error = false;
-        }
         return $config;
     }
 }
