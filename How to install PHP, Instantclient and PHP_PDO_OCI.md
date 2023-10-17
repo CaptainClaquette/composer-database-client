@@ -64,9 +64,17 @@ If you don't find the links you could create them with the following commands :
 
 To compile OCI8 you must execute the following command :
 
-**For php 8+**
+**For php 8.2**
 ```BASH
 pecl install oci8
+```
+**For php 8.1**
+```BASH
+pecl install oci8-3.2.1
+```
+**For php 8.0**
+```BASH
+pecl install oci8-3.0.1
 ```
 **For php 7.4**
 ```BASH
