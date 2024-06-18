@@ -23,9 +23,6 @@ class ConnectionDB extends PDO
     public function __construct(string $dsn, string $username = NULL, string $passwd = NULL, array $options = NULL)
     {
         parent::__construct($dsn, $username, $passwd, $options);
-        if (!$this->is_driver('oci') && !$this->is_driver('dblib')) {
-            $this->query("SET NAMES 'utf8'");
-        }
     }
 
     /**
@@ -72,7 +69,7 @@ class ConnectionDB extends PDO
      * @return array|int|mixed|null
      * @throws Exception
      */
-    public function call(string $request, array $args = [], int $return_type = 0)
+    public function call(string $request, array $args = [], int $return_type = 0): null|int|array
     {
         $this->check_query_type($request, self::QUERY_TYPE_SEARCH);
         $stmt = $this->prepare($request);
@@ -155,12 +152,26 @@ class ConnectionDB extends PDO
     {
         if ($this->is_assoc($args)) {
             foreach ($args as $k => $v) {
-                $stmt->bindValue($k, $v);
+                $stmt->bindValue($k, $v, $this->get_sql_type($v));
             }
         } else {
             for ($i = 0; $i < count($args); $i++) {
-                $stmt->bindValue($i + 1, $args[$i]);
+                $stmt->bindValue($i + 1, $args[$i], $this->get_sql_type($args[$i]));
             }
+        }
+    }
+
+    private function get_sql_type($value)
+    {
+        switch (gettype($value)) {
+            case "boolean":
+                return PDO::PARAM_BOOL;
+            case "integer":
+                return PDO::PARAM_INT;
+            case "NULL":
+                return PDO::PARAM_NULL;
+            default:
+                return PDO::PARAM_STR;
         }
     }
 

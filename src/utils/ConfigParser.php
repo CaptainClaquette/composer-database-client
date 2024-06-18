@@ -107,10 +107,14 @@ class ConfigParser
             case 'dblib':
             case 'sybase':
                 $config->dsn = "dblib:host=$raw_conf->HOST:" . intval($raw_conf->PORT) . ";dbname=" . $raw_conf->DB;
+
                 break;
             case 'oci':
                 $config->dsn = "oci:dbname=" . $raw_conf->HOST . ":" . intval($raw_conf->PORT) . "/" . $raw_conf->DB;
                 break;
+        }
+        if (property_exists($raw_conf, 'CHARSET')) {
+            $config->dsn .= ";charset=$raw_conf->CHARSET";
         }
         return $config;
     }

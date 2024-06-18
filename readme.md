@@ -1,5 +1,10 @@
 ## Patch Note
 
+### 1.5.0
+
+- Add CHARSET param to config parser.
+- removing default utf8 charset for mysql. you must now use CHARSET config param.
+
 ### 1.4.3
 - Fix Forcing utf8 queries for dblib driver
 
@@ -69,6 +74,7 @@ USER = "root"
 PWD = "mypass"
 PORT = 1234
 DRIVER = "oci" ;Accepted Values are oci,mysql,dblib,pgsl
+CHARSET = UTF8
 ```
 
 ### Exemple JSON file
@@ -82,6 +88,15 @@ DRIVER = "oci" ;Accepted Values are oci,mysql,dblib,pgsl
         "PWD": "mypass",
         "PORT": 3306,
         "DRIVER": "mysql"
+    },
+    "db2": {
+      "DB": "mydb",
+      "HOST": "localhost",
+      "USER": "root",
+      "PWD": "mypass",
+      "PORT": 3306,
+      "DRIVER": "mysql",
+      "CHARSET": "UTF-8"
     }
 }
 ```
