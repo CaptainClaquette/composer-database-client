@@ -198,8 +198,8 @@ apt-get install libaio1 libaio-dev
 ```
 #### Ubuntu 24.04+
 
-The package and the library have been renamed in 24.04. The package name now is libaio1t64 and the library is available as libaio.so.1t64
-To fix the problem you can create a symbloic link like that : 
+The package and the library have been renamed in 24.04. The package name now is libaio1t64 and the library is available as libaio.so.1t64  
+To fix the problem you can create a symbolic link like that : 
 
 ```BASH
 ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1
