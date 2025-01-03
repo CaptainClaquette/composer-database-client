@@ -205,14 +205,6 @@ To fix the problem you can create a symbolic link like that :
 ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1
 ```
 
-#### Ubuntu 24.04
-
-The lib has been renamed in ubuntu 24.04 you could solve this issue with a symlink
-
-```BASH
-ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1
-```
-
 ### Debugging
 
 You could get the requirement of OCI8 using the following command :
