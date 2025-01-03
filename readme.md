@@ -3,11 +3,13 @@
 ### 2.0.0 (Breaking changes)
 
 #### feature
+
 - Add callback param to "get" and "search" to act on lines when they are read.
 - Add property lastRowCount to store last UPDATE/INSERT/DELETE rowCount
 - Function bindValues now affect SQL type on "boolean","string","int","null" param where preparing a query.
 
 #### change
+
 - Now require php8.1 or above
 - Now require hakuryo/config-parser
 - Changing naming convention from snake_case to camelCase
@@ -15,6 +17,7 @@
 - Removing query type checks for "get","modify","search" function
 
 #### fix
+
 - Some optimization when reading database results
 
 ### 1.5.0
@@ -60,7 +63,7 @@
 
 ## Install
 
-> composer require hakuryo/database-client:^1
+> composer require hakuryo/database-client
 
 ## Dependencies
 
@@ -148,11 +151,11 @@ $db = ConnectionDB::fromFile('config.ini', 'oracle');
 $rq = "SELECT firstname FROM users WHERE id = :id";
 //Usage of named params
 // get function return the first line of the result
-$result $db->get($rq, ["id"=>1234]);
+$result = $db->get($rq, ["id"=>1234]);
 
 // Check if result is relevant
-if(property_exist($result,'id')){
-    print_r($result);
+if($result !== null){
+var_dump($result);
 }
 $db =null;
 
