@@ -1,36 +1,62 @@
 ## Patch Note
 
+### 2.0.0 (Breaking changes)
+
+#### feature
+- Add callback param to "get" and "search" to act on lines when they are read.
+- Add property lastRowCount to store last UPDATE/INSERT/DELETE rowCount
+- Function bindValues now affect SQL type on "boolean","string","int","null" param where preparing a query.
+
+#### change
+- Now require php8.1 or above
+- Now require hakuryo/config-parser
+- Changing naming convention from snake_case to camelCase
+- Removing internal class ConfigParser to use hakuryo/config-parser instead
+- Removing query type checks for "get","modify","search" function
+
+#### fix
+- Some optimization when reading database results
+
 ### 1.5.0
 
 - Add CHARSET param to config parser.
 - removing default utf8 charset for mysql. you must now use CHARSET config param.
 
 ### 1.4.3
+
 - Fix Forcing utf8 queries for dblib driver
 
 ### 1.4.2
+
 - Update composer.json for php8+ compatibility
 
 ### 1.4.1
+
 - Fix space in oci / dblib dsn build
 
 ### 1.4.0
+
 - Add call function to preform SQL procedure calls
 
 ### 1.3.0
+
 - Refactoring ConfigParser
-  - Add support for `pgsl` and `dblib` drivers
-  - Now checking if provided driver is installed with PDO::getAvailableDrivers function
+    - Add support for `pgsl` and `dblib` drivers
+    - Now checking if provided driver is installed with PDO::getAvailableDrivers function
 
 ### 1.2.1
+
 - Allowed "Truncate" keyword in modify request.
+
 ### 1.2.0
 
-- Add $classname param to search and get function. If set, these function will return database line as $classname object. (POD::FETCH_CLASS)
+- Add $classname param to search and get function. If set, these function will return database line as $classname
+  object. (POD::FETCH_CLASS)
 
 ### 1.1.0 (Breaking changes)
 
-- Remove $assoc variable from fucntion **search**,**get**,**modify**. Theses function now detect automatically if provided array is associative or not.
+- Remove $assoc variable from fucntion **search**,**get**,**modify**. Theses function now detect automatically if
+  provided array is associative or not.
 
 ## Install
 
@@ -40,7 +66,7 @@
 
 ### Mandatory
 
-- PHP >= 7.x 
+- PHP >= 7.x
 
 ### Optionnal
 
@@ -52,6 +78,7 @@
 - php-pgsql
 
 ## Features
+
 - Parsing client config from INI and JSON file
 
 ## Usage & exemples
@@ -81,23 +108,23 @@ CHARSET = UTF8
 
 ```JSON
 {
-    "db": {
-        "DB": "mydb",
-        "HOST": "localhost",
-        "USER": "root",
-        "PWD": "mypass",
-        "PORT": 3306,
-        "DRIVER": "mysql"
-    },
-    "db2": {
-      "DB": "mydb",
-      "HOST": "localhost",
-      "USER": "root",
-      "PWD": "mypass",
-      "PORT": 3306,
-      "DRIVER": "mysql",
-      "CHARSET": "UTF-8"
-    }
+  "db": {
+    "DB": "mydb",
+    "HOST": "localhost",
+    "USER": "root",
+    "PWD": "mypass",
+    "PORT": 3306,
+    "DRIVER": "mysql"
+  },
+  "db2": {
+    "DB": "mydb",
+    "HOST": "localhost",
+    "USER": "root",
+    "PWD": "mypass",
+    "PORT": 3306,
+    "DRIVER": "mysql",
+    "CHARSET": "UTF-8"
+  }
 }
 ```
 
@@ -109,7 +136,7 @@ require "./vendor/autoload.php";
 
 use hakuryo\db\ConnectionDB;
 //Connection to mysql
-$db = ConnectionDB::from_file('config.ini', 'mysql');
+$db = ConnectionDB::fromFile('config.ini', 'mysql');
 //Usage of anonnymous params
 $rq = "SELECT * FROM users";
 // search function is for multiple result
@@ -117,7 +144,7 @@ print_r($db->search($rq, [1234]));
 $db =null;
 
 //Connection to oracle
-$db = ConnectionDB::from_file('config.ini', 'oracle');
+$db = ConnectionDB::fromFile('config.ini', 'oracle');
 $rq = "SELECT firstname FROM users WHERE id = :id";
 //Usage of named params
 // get function return the first line of the result
@@ -130,7 +157,7 @@ if(property_exist($result,'id')){
 $db =null;
 
 //Connection with a config.ini without section
-$db = ConnectionDB::from_file('config_without_section.ini');
+$db = ConnectionDB::fromFile('config_without_section.ini');
 $rq = "INSERT INTO users (firstname,lastname) VALUES (:fname,:lname)";
 //Modify is use to perform update, insert or delete operation
 print_r($db->modify($rq, ["fname"=>"Bob","lname"=>"Moran"]));
