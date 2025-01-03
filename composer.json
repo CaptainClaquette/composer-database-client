@@ -10,10 +10,9 @@
         }
     ],
     "autoload": {
-        "classmap": [
-            "src/",
-            "src/utils/"
-        ]
+        "psr-4": {
+            "hakuryo\\db\\": "src/"
+        }
     },
     "require": {
         "php": ">=8.1",
