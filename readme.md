@@ -1,5 +1,30 @@
 ## Patch Note
 
+### 2.1.0
+
+#### feature
+
+- Add trackBy param to search function. This param will replace the auto index key of the array by the value of the key for the corresponding line.
+
+exemple:
+```PHP
+
+$db = ConnectionDB::fromFile("my_file",'mydb');
+$res = $db->search(request:"SELECT id,name,mail from user",trackBy:"mail");
+print_r($res);
+// Will ouptut something like this with id = 1 name=toto and mail=toto@domaine.fr
+Array
+(
+  ["toto@domaine.fr"] => stdClass Object
+  (
+      [id] => 1
+      [name] => toto
+      [mail] => toto@domaine.fr
+  ) 
+)
+
+``` 
+
 ### 2.0.0 (Breaking changes)
 
 #### feature

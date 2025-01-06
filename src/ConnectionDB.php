@@ -50,17 +50,20 @@ class ConnectionDB extends PDO
      * @param array $args An associative/sequential array of argument for the prepared query
      * @param string $classname a className for pdo to return. Default stdClass
      * @param callable|null $callback a function to call on each line. Default null
+     * @param string|null $trackBy replace the auto index key of the array by the value of the key for the corresponding line.
+     * Tracking by "name" for example while generate an array like so :
+     * * array['value_of_name for entry'] = "corresponding entry"
+     * @return array|null return the result as an array of $classname object or null if no result.
      * @throws \PDOException
-     * * @return array|null return the result as an array of $classname object or null if no result.
-     */
-    public function search(string $request, array $args = [], string $classname = "stdClass", callable $callback = null): array|null
+     * */
+    public function search(string $request, array $args = [], string $classname = "stdClass", callable $callback = null, string $trackBy = null): array|null
     {
         $stmt = $this->prepare($request);
         $this->bindValues($stmt, $args);
         $result = $stmt->execute();
         if ($result) {
             $stmt->setFetchMode(PDO::FETCH_CLASS, $classname);
-            return $this->fetchResults($stmt, $callback);
+            return $this->fetchResults($stmt, $callback, $trackBy);
         }
         return null;
     }
@@ -71,8 +74,8 @@ class ConnectionDB extends PDO
      * @param array $args An associative/sequential array of argument for the prepared query
      * @param string $classname a className for pdo to return. Default stdClass
      * @param callable|null $callback a function to call on each line. Default null
-     * @throws \PDOException
      * @return $classname|null return the result as object of className or null if no result.
+     * @throws \PDOException
      */
     public function get($request, $args = [], string $classname = "stdClass", callable $callback = null)
     {
@@ -172,16 +175,30 @@ class ConnectionDB extends PDO
         }
     }
 
-    private function fetchResults(PDOStatement $stmt, callable $callback = null): array
+    private function fetchResults(PDOStatement $stmt, callable $callback = null, string $trackBy = null): array
     {
         $result = [];
-        if ($callback != null) {
-            while ($line = $stmt->fetch()) {
+        while ($line = $stmt->fetch()) {
+            if ($callback != null) {
                 call_user_func($callback, $line);
+            }
+            if ($trackBy !== null) {
+                try {
+                    $reflect = new \ReflectionClass($line);
+                    if ($reflect->getShortName() !== \stdClass::class) {
+                        $track = $reflect->getProperty($trackBy)->getValue($line);
+                        $result[$track] = $line;
+                    } else {
+                        $result[$line->$trackBy] = $line;
+                    }
+                } catch (\ReflectionException $e) {
+                    error_reporting($e->getMessage());
+                    $result[] = $line;
+                }
+            } else {
                 $result[] = $line;
             }
-        } else {
-            $result = $stmt->fetchAll();
+
         }
         return $result;
     }
