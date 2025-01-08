@@ -81,13 +81,15 @@ class ConnectionDB extends PDO
     {
         $stmt = $this->prepare($request);
         $this->bindValues($stmt, $args);
-        if ($stmt->execute() && $stmt->rowCount() > 0) {
+        if ($stmt->execute()) {
             $stmt->setFetchMode(PDO::FETCH_CLASS, $classname);
             $line = $stmt->fetch();
-            if ($callback !== null) {
-                call_user_func($callback, $line);
+            if ($line !== false) {
+                if ($callback !== null) {
+                    call_user_func($callback, $line);
+                }
+                return $line;
             }
-            return $line;
         }
         return null;
     }
