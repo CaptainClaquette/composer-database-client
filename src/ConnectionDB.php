@@ -38,7 +38,7 @@ class ConnectionDB extends PDO
         self::verifyDriver($rawConf);
         $conf = self::makePDOConfig($rawConf);
         $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
-        if ($conf->timeout) {
+        if (property_exists($conf, 'timeout')) {
             $options[] = [PDO::ATTR_TIMEOUT => intval($conf->timeout)];
         }
         return new ConnectionDB($conf->dsn, $conf->user, $conf->pwd, $options);
