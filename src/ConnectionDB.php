@@ -74,10 +74,10 @@ class ConnectionDB extends PDO
      * @param array $args An associative/sequential array of argument for the prepared query
      * @param string $classname a className for pdo to return. Default stdClass
      * @param callable|null $callback a function to call on each line. Default null
-     * @return $classname|null return the result as object of className or null if no result.
+     * @return mixed return the result as object of className or null if no result.
      * @throws \PDOException
      */
-    public function get($request, $args = [], string $classname = "stdClass", callable $callback = null)
+    public function get($request, $args = [], string $classname = "stdClass", callable $callback = null): mixed
     {
         $stmt = $this->prepare($request);
         $this->bindValues($stmt, $args);
