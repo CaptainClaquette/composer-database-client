@@ -177,7 +177,7 @@ class ConnectionDB extends PDO
         }
     }
 
-    private function fetchResults(PDOStatement $stmt, callable $callback = null, string $trackBy = null): array
+    private function fetchResults(PDOStatement $stmt, callable $callback = null, string $trackBy = null): array|null
     {
         $result = [];
         while ($line = $stmt->fetch()) {
@@ -202,7 +202,7 @@ class ConnectionDB extends PDO
             }
 
         }
-        return $result;
+        return count($result) > 0 ? $result : null;
     }
 
     private static function verifyDriver(\stdClass $config)
