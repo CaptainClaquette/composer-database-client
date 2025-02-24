@@ -37,9 +37,10 @@ class ConnectionDB extends PDO
         $rawConf = ConfigParser::parse($path, $section, self::MANDATORY_KEY);
         self::verifyDriver($rawConf);
         $conf = self::makePDOConfig($rawConf);
-        $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
+        $options = [];
+        $options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
         if (property_exists($conf, 'timeout')) {
-            $options[] = [PDO::ATTR_TIMEOUT => intval($conf->timeout)];
+            $options[PDO::ATTR_TIMEOUT] = intval($conf->timeout);
         }
         return new ConnectionDB($conf->dsn, $conf->user, $conf->pwd, $options);
     }
