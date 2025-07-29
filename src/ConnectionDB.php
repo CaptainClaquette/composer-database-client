@@ -20,7 +20,7 @@ class ConnectionDB extends PDO
      * @param string|NULL $passwd User password for your database
      * @param array|NULL $options PDO options
      */
-    public function __construct(string $dsn, string $username = NULL, string $passwd = NULL, array $options = NULL)
+    public function __construct(string $dsn, ?string $username = NULL, ?string $passwd = NULL, array $options = NULL)
     {
         parent::__construct($dsn, $username, $passwd, $options);
     }
@@ -32,7 +32,7 @@ class ConnectionDB extends PDO
      * @return ConnectionDB
      * @throws Exception If the ini file don't provide the mandatory keys "HOST", "DB", "USER", "PWD", "PORT", "DRIVER"
      */
-    public static function fromFile(string $path, $section = null): ConnectionDB
+    public static function fromFile(string $path, ?string $section = null): ConnectionDB
     {
         $rawConf = ConfigParser::parse($path, $section, self::MANDATORY_KEY);
         self::verifyDriver($rawConf);
@@ -57,7 +57,7 @@ class ConnectionDB extends PDO
      * @return array|null return the result as an array of $classname object or null if no result.
      * @throws \PDOException
      * */
-    public function search(string $request, array $args = [], string $classname = "stdClass", callable $callback = null, string $trackBy = null): array|null
+    public function search(string $request, array $args = [], string $classname = "stdClass", callable $callback = null, ?string $trackBy = null): array|null
     {
         $stmt = $this->prepare($request);
         $this->bindValues($stmt, $args);
@@ -78,7 +78,7 @@ class ConnectionDB extends PDO
      * @return mixed return the result as object of className or null if no result.
      * @throws \PDOException
      */
-    public function get($request, $args = [], string $classname = "stdClass", callable $callback = null): mixed
+    public function get(string $request, array $args = [], string $classname = "stdClass", ?callable $callback = null): mixed
     {
         $stmt = $this->prepare($request);
         $this->bindValues($stmt, $args);
@@ -103,7 +103,7 @@ class ConnectionDB extends PDO
      * @return mixed
      * @throws Exception
      */
-    public function call(string $request, array $args = [], string $classname = "stdClass", callable $callback = null): mixed
+    public function call(string $request, array $args = [], string $classname = "stdClass", ?callable $callback = null): mixed
     {
         $stmt = $this->prepare($request);
         $this->bindValues($stmt, $args);
@@ -178,7 +178,7 @@ class ConnectionDB extends PDO
         }
     }
 
-    private function fetchResults(PDOStatement $stmt, callable $callback = null, string $trackBy = null): array|null
+    private function fetchResults(PDOStatement $stmt, ?callable $callback = null, ?string $trackBy = null): array|null
     {
         $result = [];
         while ($line = $stmt->fetch()) {
